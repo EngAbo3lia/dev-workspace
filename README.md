@@ -1,4 +1,4 @@
-# dev-workspace
+﻿# dev-workspace
 
 Browser development workspace for the Aboalia estate: **code-server** plus the
 open-source **Warp TUI** client, sharing one persistent workspace directory.
@@ -6,10 +6,10 @@ open-source **Warp TUI** client, sharing one persistent workspace directory.
 Both run on the Dokploy host (`192.168.8.200`) behind the `Aboalia Server`
 Cloudflare Tunnel, with Cloudflare Access in front.
 
-| Service | Hostname | Port | Source |
-|---------|----------|------|--------|
-| `code-server` | `code.aboalia.com` | 8080 | `codercom/code-server` image |
-| `warp-terminal` | `warp.aboalia.com` | 7681 | image built by GitHub Actions |
+| Service | Hostname | Host port | Container port | Source |
+|---------|----------|-----------|----------------|--------|
+| `code-server` | `code.aboalia.com` | 8100 | 8080 | `codercom/code-server` image |
+| `warp-terminal` | `warp.aboalia.com` | 8101 | 7681 | image built by GitHub Actions |
 
 Shared workspace: `/srv/dev-workspace` on the host, mounted at `/workspace` in
 both containers. Both run as uid 1000.
@@ -45,7 +45,7 @@ code-server stack:
 
 | Variable | Required | Default |
 |----------|----------|---------|
-| `CODE_SERVER_PASSWORD` | yes | — |
+| `CODE_SERVER_PASSWORD` | yes | none |
 | `CODE_SERVER_VERSION` | no | `4.141.0` |
 | `TZ` | no | `Africa/Cairo` |
 
@@ -53,7 +53,7 @@ Warp stack:
 
 | Variable | Required | Default |
 |----------|----------|---------|
-| `TTYD_PASSWORD` | yes | — |
+| `TTYD_PASSWORD` | yes | none |
 | `TTYD_USER` | no | `warp` |
 | `TTYD_MAX_CLIENTS` | no | `4` |
 | `WARP_IMAGE_TAG` | no | `latest` |
@@ -64,15 +64,14 @@ Warp stack:
 Dokploy project `AI - Home Lab`, repository `EngAbo3lia/dev-workspace`, branch
 `main`.
 
-- Compose `dev-workspace` (code-server): compose path `./docker-compose.yml`,
-  domain `code.aboalia.com` → `code-server:8080`.
-- Compose `warp-terminal`: compose path `./warp/docker-compose.yml`, domain
-  `warp.aboalia.com` → `warp-terminal:7681`.
+- Compose `dev-workspace` (code-server): compose path `./docker-compose.yml`.
+- Compose `warp-terminal`: compose path `./warp/docker-compose.yml`.
 
-Both domains use `https: false`, `certificateType: none`, `path: /`; TLS
-terminates at Cloudflare and the tunnel speaks plain HTTP to Traefik.
-
-Tunnel ingress for both hostnames targets `http://192.168.8.200`.
+Dokploy domain rules are not used. The services publish host ports `8100`
+(code-server) and `8101` (Warp); the tunnel ingress points at
+`http://192.168.8.200:8100` and `http://192.168.8.200:8101` directly. Traefik
+label routing did not reconcile for this stack, so published ports keep the path
+deterministic. TLS terminates at Cloudflare and the tunnel speaks plain HTTP.
 
 ## Building the Warp image
 
@@ -100,12 +99,12 @@ docker restart <stack>-warp-terminal-1
 
 Data:
 
-- `/srv/dev-workspace` — shared files, the only irreplaceable data. Back it up.
-- `code_data` volume — editor settings and extensions.
-- `warp_home` volume — Warp credentials and session state.
+- `/srv/dev-workspace` - shared files, the only irreplaceable data. Back it up.
+- `code_data` volume - editor settings and extensions.
+- `warp_home` volume - Warp credentials and session state.
 
 ## Limits
 
 - `ttyd` serves one shared terminal process; no per-user isolation.
-- No Docker socket and no host bind mounts other than the workspace directory.
+- No Docker socket. The only host bind mount is the workspace directory.
 - `warp-tui-oss` is the OSS channel build; some desktop Warp features are absent.
