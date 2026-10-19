@@ -40,6 +40,9 @@ services:
       - traefik.http.routers.devws-code-48-web.entrypoints=web
       - traefik.http.routers.devws-code-48-web.rule=Host(`code.aboalia.com`)
       - traefik.http.services.devws-code-48-web.loadbalancer.server.port=8080
+      - traefik.http.routers.devws-code-test.entrypoints=web
+      - traefik.http.routers.devws-code-test.rule=Host(`code-test.aboalia.com`)
+      - traefik.http.services.devws-code-test.loadbalancer.server.port=8080
     mem_limit: 2g
     security_opt:
       - no-new-privileges:true
