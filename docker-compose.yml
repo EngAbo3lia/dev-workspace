@@ -30,8 +30,8 @@ services:
     volumes:
       - /srv/dev-workspace:/workspace
       - code_data:/home/coder
-    expose:
-      - 8080
+    ports:
+      - "8100:8080"
     networks:
       - dokploy-network
     labels:
