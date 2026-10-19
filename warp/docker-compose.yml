@@ -1,4 +1,4 @@
-services:
+﻿services:
   workspace-init:
     image: alpine:3.22
     command:
@@ -37,11 +37,7 @@ services:
       retries: 3
       start_period: 20s
 
-  warp-smoke:
-    image: ghcr.io/engabo3lia/dev-workspace-warp:${WARP_IMAGE_TAG:-latest}
-    entrypoint: ["/opt/warp/warp-tui-oss"]
-    command: ["dump-settings-schema", "/tmp/schema.json"]
-    restart: "no"
 
 volumes:
   warp_home:
+
