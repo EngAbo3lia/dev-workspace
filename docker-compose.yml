@@ -37,9 +37,7 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test:
-        - CMD-SHELL
-        - curl -fsS -u "$${TTYD_USER}:$${TTYD_PASSWORD}" http://127.0.0.1:7681/ -o /dev/null
+      test: ["CMD-SHELL", "curl -fsS -u \"$${TTYD_USER}:$${TTYD_PASSWORD}\" http://127.0.0.1:7681/ -o /dev/null"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -72,9 +70,7 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test:
-        - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:8080/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/healthz').then((r) => { process.exit(r.ok ? 0 : 1); }).catch(() => process.exit(1))\""]
       interval: 30s
       timeout: 5s
       retries: 3
