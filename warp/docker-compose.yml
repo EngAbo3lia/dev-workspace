@@ -24,8 +24,8 @@ services:
     volumes:
       - /srv/dev-workspace:/workspace
       - warp_home:/home/warp
-    expose:
-      - 7681
+    ports:
+      - "8101:7681"
     mem_limit: 4g
     pids_limit: 2048
     security_opt:
