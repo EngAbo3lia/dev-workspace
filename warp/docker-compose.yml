@@ -1,0 +1,41 @@
+services:
+  workspace-init:
+    image: alpine:3.22
+    command:
+      - sh
+      - -c
+      - "mkdir -p /workspace && chown 1000:1000 /workspace && chmod 0775 /workspace"
+    volumes:
+      - /srv/dev-workspace:/workspace
+    restart: "no"
+
+  warp-terminal:
+    image: ghcr.io/engabo3lia/dev-workspace-warp:${WARP_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      workspace-init:
+        condition: service_completed_successfully
+    environment:
+      TTYD_USER: ${TTYD_USER:-warp}
+      TTYD_PASSWORD: ${TTYD_PASSWORD}
+      TTYD_MAX_CLIENTS: ${TTYD_MAX_CLIENTS:-4}
+      TZ: ${TZ:-Africa/Cairo}
+    volumes:
+      - /srv/dev-workspace:/workspace
+      - warp_home:/home/warp
+    expose:
+      - 7681
+    mem_limit: 4g
+    pids_limit: 2048
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u \"$${TTYD_USER}:$${TTYD_PASSWORD}\" http://127.0.0.1:7681/ -o /dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  warp_home:

@@ -1,0 +1,41 @@
+name: warp-image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - warp/Dockerfile
+      - warp/entrypoint.sh
+      - .github/workflows/warp-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./warp
+          push: true
+          tags: |
+            ghcr.io/engabo3lia/dev-workspace-warp:latest
+            ghcr.io/engabo3lia/dev-workspace-warp:${{ github.sha }}
+          build-args: |
+            WARP_REF=ae60375ef1d3895908756878fe4a07cbe703ce1a
+            CARGO_BUILD_JOBS=2
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
