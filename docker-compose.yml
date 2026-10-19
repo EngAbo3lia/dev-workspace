@@ -32,6 +32,14 @@ services:
       - code_data:/home/coder
     expose:
       - 8080
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.devws-code-48-web.entrypoints=web
+      - traefik.http.routers.devws-code-48-web.rule=Host(`code.aboalia.com`)
+      - traefik.http.services.devws-code-48-web.loadbalancer.server.port=8080
     mem_limit: 2g
     security_opt:
       - no-new-privileges:true
@@ -44,3 +52,7 @@ services:
 
 volumes:
   code_data:
+
+networks:
+  dokploy-network:
+    external: true
